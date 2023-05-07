@@ -1,0 +1,55 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import math
+import pandas as pd
+
+def MySinSeries(x,m):
+    y = np.zeros_like(x)
+    for i in range(1,m+1):
+        if i % 2 == 1:
+            y+= np.sin(i*x)/i
+        else:
+            y-= np.sin(i*x)/i
+    return y
+x = np.linspace(-2*np.pi,2*np.pi,1000)
+plt.figure(figsize=(10,5))
+plt.plot(x,np.sin(x),label = 'sin(x)')
+plt.plot(x,MySinSeries(x,1),label = 'MySinSeries(m=1)')
+plt.plot(x,MySinSeries(x,2),label = 'MySinSeries(m=2)')
+plt.plot(x,MySinSeries(x,5),label = 'MySinSeries(m=5)')
+plt.plot(x,MySinSeries(x,10),label = 'MySinSeries(m=10)')
+plt.plot(x,MySinSeries(x,20),label = 'MySinSeries(m=20)')
+plt.legend()
+plt.grid()
+plt.show()
+
+def SinAccurateToNDigits(n_digits):
+    step = math.pi/8
+    x = np.arange(0, math.pi+step, step)
+    actual_sin = np.sin(x)
+    y = np.zeros_like(x)
+    terms = np.zeros_like(x, dtype=int)
+    
+    for i, xi in enumerate(x):
+        eps = 0.5 * 10**(-n_digits)
+        err = 1
+        m = 1
+        while err > eps:
+            y[i] += np.sin(m*xi) / m
+            err = abs(y[i] - actual_sin[i])
+            m += 1
+        terms[i] = m-1
+    
+    df = pd.DataFrame({'x': x, 'Actual sin(x)': actual_sin, f'Sin(x) accurate to {n_digits} digits': y, 'Number of terms': terms})
+    return df
+df = SinAccurateToNDigits(3)
+x = df['x']
+actual_sin = df['Actual sin(x)']
+sin_acc = df[f'Sin(x) accurate to 3 digits']
+
+plt.plot(x, actual_sin, label='Actual sin(x)')
+plt.plot(x, sin_acc, 'o', label='Sin(x) accurate to 3 digits')
+plt.legend()
+plt.show()
+print(df.to_string(index=False))
+
